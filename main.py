@@ -1,8 +1,5 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from pydantic import BaseModel, conlist
-from sklearn.linear_model import Perceptron
-from sklearn.preprocessing import LabelEncoder
-import pandas as pd
 from functions.get_formated_data import getFormatedData
 
 from functions.train_model import train_model
