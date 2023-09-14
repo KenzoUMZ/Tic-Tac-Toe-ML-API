@@ -3,46 +3,38 @@ from pydantic import BaseModel, conlist
 from sklearn.linear_model import Perceptron
 from sklearn.preprocessing import LabelEncoder
 import pandas as pd
+from functions.get_formated_data import getFormatedData
 
-from functions.train_perceptron import train_perceptron
+from functions.train_model import train_model
 
 app = FastAPI()
-
-
-# Define a Pydantic model to specify the JSON request body structure
-
-# Modify the Pydantic model to specify the expected number of features
 class PredictionRequest(BaseModel):
-    features: conlist(int, min_length=27, max_length=27)  # Assuming you expect 27 features
+    features: conlist(int, min_length=9, max_length=9)
 
+[testsSamples, samples, targets] = getFormatedData()
+perceptron = train_model(samples=samples, targets=targets)
+testsPrediction = perceptron.predict(testsSamples)
+positivesCount = sum(value == '+1' for value in testsPrediction)
+negativesCount = sum(value == '-1' for value in testsPrediction)
 
-# Train the perceptron when the application starts
-perceptron = train_perceptron('tic_tac_toe.csv')
-
-
-# Define the prediction endpoint
 @app.post("/predict")
 async def predict(request_body: PredictionRequest):
-    # Extract the features from the request body
     features = request_body.features
+    input_sample = [features]
 
-    # Convert the input features to a numpy array (assuming one-hot encoding is done)
-    input_features = [features]  # Convert to list of lists
+    prediction = perceptron.predict(input_sample)
 
-    # Make a prediction using the trained perceptron
-    prediction = perceptron.predict(input_features)
-
-    # Map the numerical prediction back to labels
-    result = 'positivo' if prediction[0] == 1 else 'negativo'
-
+    result = 'positivo' if prediction[0] == '+1' else 'negativo'
     return {"prediction": result}
 
-
 @app.get("/")
-async def root():
+async def print():
     return {"message": "Hello World"}
 
+@app.get("/positive-count")
+async def getPositiveStatistics():
+    return {"message": f"Quantidade de POSITIVOS ENCONTRADA: {positivesCount} x 96 esperado"}
 
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+@app.get("/negative-count")
+async def getNegativeStatistics():
+    return {"message": f"Quantidade de NEGATIVOS ENCONTRADA: {negativesCount} x 96 esperado"}
