@@ -11,6 +11,8 @@ class PredictionRequest(BaseModel):
 [testsSamples, samples, targets] = getFormatedData()
 perceptron = train_model(samples=samples, targets=targets)
 testsPrediction = perceptron.predict(testsSamples)
+
+print('\n\nQUANTIDADE DE AMOSTRAS UTILIZADAS PARA TESTAR O MODELO::::', len(testsSamples))
 positivesCount = sum(value == '+1' for value in testsPrediction)
 negativesCount = sum(value == '-1' for value in testsPrediction)
 
@@ -21,7 +23,7 @@ async def predict(request_body: PredictionRequest):
 
     prediction = perceptron.predict(input_sample)
 
-    result = 'positivo' if prediction[0] == '+1' else 'negativo'
+    result = 'sim' if prediction[0] == '+1' else 'nao'
     return {"prediction": result}
 
 @app.get("/")
@@ -30,8 +32,8 @@ async def print():
 
 @app.get("/positive-count")
 async def getPositiveStatistics():
-    return {"message": f"Quantidade de POSITIVOS ENCONTRADA: {positivesCount} x 96 esperado"}
+    return {"message": f"Vitórias de X encontradas {positivesCount} x 96 esperado"}
 
 @app.get("/negative-count")
 async def getNegativeStatistics():
-    return {"message": f"Quantidade de NEGATIVOS ENCONTRADA: {negativesCount} x 96 esperado"}
+    return {"message": f"Quantidades de vezes que x não venceu {negativesCount} x 96 esperado"}
